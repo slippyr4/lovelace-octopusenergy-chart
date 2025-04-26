@@ -43,11 +43,14 @@ export class OctopusEnergyChart extends LitElement {
     }
 
     ha-card {
-      //height: 200px;
       height: 100%;
-      padding: 0 16px 16px 16px;
+      padding: 16px;
       display: flex;
       flex-direction: column;
+    }
+
+    ha-card.with-header {
+      padding-top: 0;
     }
 
     .chart-wrapper {
@@ -66,15 +69,12 @@ export class OctopusEnergyChart extends LitElement {
   `;
 
   getCardSize() {
-    console.log("in getCardSize");
     return 3;
   }
 
   getGridOptions() {
-    console.log("in getGridOptions");
 
     return {
-      // rows: 3,
       columns: 12,
       min_rows: 1,
       rows: 4,
@@ -84,7 +84,6 @@ export class OctopusEnergyChart extends LitElement {
 
 
   static getConfigForm() {
-    console.log("in get config form");
 
     // Define the form schema.
     const SCHEMA = [
@@ -110,17 +109,15 @@ export class OctopusEnergyChart extends LitElement {
   @state() private config!: OctopusEnergyChartCardConfig;
 
   setConfig(config: OctopusEnergyChartCardConfig) {
-    console.log(JSON.stringify(config));
     if (!config.current_rates_entity) throw new Error("Current rates entity required");
     this.config = {
-      name: "OctopusEnergyChartCard",
+      name: "",
       ...config
     }
   }
 
 
   firstUpdated() {
-    console.log("creating chart");
 
     const canvas = this._canvasRef.value;
     if (!canvas) return;
@@ -173,6 +170,23 @@ export class OctopusEnergyChart extends LitElement {
         plugins: {
           legend: {
             display: false,
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const label = context.dataset.label || '';
+                const value = context.parsed.y.toFixed(2);
+                return `${value} p/kWh`;  
+              },
+              title: function(context) {
+                const start = DateTime.fromISO(context[0].label);
+                const end = start.plus({ minutes: 30});
+                const tomorrow = DateTime.now().plus({ days: 1 });
+                const isTomorrow = start.hasSame(tomorrow, 'day');
+
+                return isTomorrow ? `Tomorrow ${start.toFormat("HH:mm")} - ${end.toFormat("HH:mm")}` : `${start.toFormat("HH:mm")} - ${end.toFormat("HH:mm")}`;
+              }
+            }
           }
 
         }
@@ -182,15 +196,6 @@ export class OctopusEnergyChart extends LitElement {
   }
 
   updated(changedProps: PropertyValues) {
-    console.log("in updated");
-
-    if (this._canvasRef.value) {
-      const canvas = this._canvasRef.value;
-      const rect = canvas.getBoundingClientRect();
-      console.log(`Canvas dimensions: ${canvas.width}x${canvas.height}`);
-      console.log(`Canvas bounding rect: ${rect.width}x${rect.height}`);
-    }
-
 
     if (this.config && this.chart) {
       const current_rates_entityId = this.config?.current_rates_entity;
@@ -204,7 +209,6 @@ export class OctopusEnergyChart extends LitElement {
         values = values.concat(...ratesToday.attributes.rates.map((rate: rateAttribute) => rate.value_inc_vat * 100));
         labels = labels.concat(...ratesToday.attributes.rates.map((rate: any) => rate.start));
 
-        console.log(`next rates: ${next_rates_entityId}`);
         if (next_rates_entityId) {
           const ratesTomorrow = this.hass.states[next_rates_entityId];
           values = values.concat(...ratesTomorrow.attributes.rates.map((rate: rateAttribute) => rate.value_inc_vat * 100));
@@ -241,13 +245,26 @@ export class OctopusEnergyChart extends LitElement {
 
 
   render() {
-    return html`
-    <ha-card .header=${this.config.name}>
-      <div class="chart-wrapper">
-        <canvas ${ref(this._canvasRef)}></canvas>
-      </div>
-    </ha-card>
-  `;
+    if (this.config.name) {
+      return html`
+      <ha-card .header=${this.config.name} class="with-header">
+        <div class="chart-wrapper">
+          <canvas ${ref(this._canvasRef)}></canvas>
+        </div>
+      </ha-card>
+    `;
+    }
+    else {
+
+      return html`
+      <ha-card>
+        <div class="chart-wrapper">
+          <canvas ${ref(this._canvasRef)}></canvas>
+        </div>
+      </ha-card>
+    `;
+    }
+   
   }
 
 }
