@@ -148,6 +148,17 @@ export class OctopusEnergyChart extends LitElement {
         layout: {
           padding: 0
         },
+        animation: {
+          duration: 0
+        },
+        transitions: {
+          active: {
+            animation: {
+              duration: 100
+            }
+          }
+        },
+        normalized: true,
         responsive: true,
         maintainAspectRatio: false,
         scales: {

@@ -23070,6 +23070,17 @@ let OctopusEnergyChart = class OctopusEnergyChart extends i$1 {
                 layout: {
                     padding: 0
                 },
+                animation: {
+                    duration: 0
+                },
+                transitions: {
+                    active: {
+                        animation: {
+                            duration: 100
+                        }
+                    }
+                },
+                normalized: true,
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
