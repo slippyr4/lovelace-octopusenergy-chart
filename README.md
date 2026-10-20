@@ -18,7 +18,7 @@ Simply click this button to go directly to the details page:
 
 In the Home Assistant UI:
 * Use HACS -> Top Right Menu -> Custom repositories
-* Enter a repo of `slippyr4/lovelace-octopusenwrgy-chart` and category of "Dashboard", and click the Add button
+* Enter a repo of `slippyr4/lovelace-octopusenergy-chart` and category of "Dashboard", and click the Add button
 * On the main HACS windows search for Octopus Energy Chart and download it
 
 This should automatically configure all the resources, so you can now skip to **Configuration**.
